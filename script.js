@@ -67,8 +67,6 @@ document.getElementById('calculate-btn').addEventListener('click', () => {
         return;
     }
     
-    alert('Regression calculation is successful!');
-    
     // Scroll to results section
     setTimeout(() => {
         window.scrollTo({

@@ -63,9 +63,19 @@ document.getElementById('calculate-btn').addEventListener('click', () => {
     });
 
     if (xValues.length < 2) {
-        alert('Please enter at least 2 data points.');
+        alert('Please input at least 2 data points first!');
         return;
     }
+    
+    alert('Regression calculation is successful!');
+    
+    // Scroll to results section
+    setTimeout(() => {
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: 'smooth'
+        });
+    }, 100);
 
     // Calculate regression
     const n = xValues.length;

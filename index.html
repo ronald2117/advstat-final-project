@@ -1,95 +1,284 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Advanced Statistics</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background: radial-gradient(circle at top right, #e0e7ff 0%, #ede9fe 40%, #fafafa 100%);
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.6);
+        }
+
+        /* Buttons */
+        .nav-btn {
+            background: linear-gradient(135deg, #3b82f6, #4f46e5);
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #2563eb, #4338ca);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        /* Card */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(229, 231, 235, 0.6);
+            border-radius: 1rem;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.4), 0 0 60px rgba(79, 70, 229, 0.25), 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(6px);
+            justify-content: center;
+            align-items: center;
+            z-index: 50;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+            transform: scale(0.85);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease forwards;
+        }
+
+        .modal-content.active {
+            transform: scale(1);
+            animation: zoomIn 0.3s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes zoomIn {
+            from { transform: scale(0.9); }
+            to { transform: scale(1.05); }
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <!-- Header -->
-    <div class="py-6 shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold">Advanced Statistics</h1>
-                <a href="team.html" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 shadow-md font-semibold">
-                    Our Team
-                </a>
-            </div>
-        </div>
+
+<body>
+<!-- HEADER -->
+<header class="header py-6 shadow-sm sticky top-0 z-10">
+    <div class="container mx-auto px-5 flex justify-between items-center">
+        <h1 class="text-3xl font-extrabold bg-gradient-to-r from-blue-600 to-indigo-700 bg-clip-text text-transparent">
+            Advanced Statistics
+        </h1>
+        <a href="team.html" class="nav-btn flex items-center gap-2 px-5 py-2 rounded-xl font-semibold text-lg">
+            <i class="fa-solid fa-users"></i>
+            <span>Our Team</span>
+        </a>
     </div>
+</header>
 
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8">
-        <div class="bg-white rounded-lg shadow-xl p-8 mb-8">
-            <h2 class="text-2xl font-bold text-gray-800 mb-2">Simple Linear Regression</h2>
-            <p class="text-gray-600 mb-6">Enter your data points below</p>
-            
-            <!-- Input Section -->
-            <div class="mb-6">
-                <div class="grid grid-cols-[1fr_1fr_auto] gap-4 mb-3">
-                    <div class="font-semibold text-gray-700">X-Values</div>
-                    <div class="font-semibold text-gray-700">Y-Values</div>
-                    <div class="w-10"></div>
-                </div>
-                
-                <div id="input-rows" class="space-y-2">
-                    <!-- Dynamic rows will be added here -->
-                </div>
+<!-- MAIN -->
+<main class="container mx-auto px-4 py-12">
+    <!-- INPUT CARD -->
+    <section class="card p-8 mb-12">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div>
+                <h2 class="text-3xl font-bold text-gray-800 tracking-tight mb-2">
+                    Simple Linear Regression
+                </h2>
+                <p class="text-gray-600 text-lg">Enter your data points below</p>
             </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <button id="add-row-btn" class="px-4 py-2 bg-green-500 text-white rounded-lg hover:cursor-pointer hover:bg-green-600 transition-colors duration-200 shadow-md font-semibold">
-                    + Add Row
+            <div class="flex gap-3 justify-end">
+                <button id="add-row-btn"
+                        class="px-5 py-2 bg-green-500 text-white rounded-lg font-semibold shadow-md hover:bg-green-600 transition">
+                    <i class="fa-solid fa-plus mr-1"></i> Add Row
                 </button>
-                
-                <button id="calculate-btn" class="px-6 py-3 hover:cursor-pointer bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 shadow-lg font-semibold text-lg">
-                    Calculate Regression
+                <button id="calculate-btn"
+                        class="px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-700 text-white rounded-lg shadow-lg hover:from-blue-700 hover:to-indigo-800 font-semibold text-lg transition">
+                    <i class="fa-solid fa-calculator mr-2"></i> Calculate Regression
                 </button>
             </div>
         </div>
 
-        <!-- Results Section -->
-        <div class="grid md:grid-cols-2 gap-8">
-            <!-- Calculation Results -->
-            <div class="bg-white rounded-lg shadow-xl p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Calculation Results</h2>
-                <div class="space-y-4">
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <p class="text-sm text-gray-600 mb-1">Regression Equation</p>
-                        <p id="equation" class="text-lg font-mono text-blue-700 font-semibold">y = mx + b</p>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <p class="text-sm text-gray-600 mb-1">Slope (m)</p>
-                        <p id="slope" class="text-lg font-semibold text-gray-800">-</p>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <p class="text-sm text-gray-600 mb-1">Y-Intercept (b)</p>
-                        <p id="intercept" class="text-lg font-semibold text-gray-800">-</p>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <p class="text-sm text-gray-600 mb-1">Correlation Coefficient (r)</p>
-                        <p id="correlation" class="text-lg font-semibold text-gray-800">-</p>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <p class="text-sm text-gray-600 mb-1">Coefficient of Determination (r²)</p>
-                        <p id="r-squared" class="text-lg font-semibold text-gray-800">-</p>
-                    </div>
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <p class="text-sm text-gray-600 mb-1">Strength of Relationship</p>
-                        <p id="strength" class="text-lg font-semibold text-gray-800">-</p>
-                    </div>
+        <div class="mt-6">
+            <div class="grid grid-cols-[1fr_1fr_auto] gap-4 mb-3">
+                <div class="font-semibold text-gray-700">X-Values</div>
+                <div class="font-semibold text-gray-700">Y-Values</div>
+                <div class="w-10"></div>
+            </div>
+            <div id="input-rows" class="space-y-2"></div>
+        </div>
+    </section>
+
+    <!-- RESULTS & SCATTER -->
+    <section id="results-section" class="grid md:grid-cols-2 gap-10">
+        <!-- RESULTS CARD -->
+        <div id="results-card" class="card shadow-xl p-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3 tracking-tight">
+                Calculation Results
+            </h2>
+            <div class="space-y-4">
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-sm text-gray-600 mb-1">Regression Equation</p>
+                    <p id="equation" class="text-lg font-mono text-blue-700 font-semibold">y = mx + b</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-sm text-gray-600 mb-1">Slope (m)</p>
+                    <p id="slope" class="text-lg font-semibold text-gray-800">-</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-sm text-gray-600 mb-1">Y-Intercept (b)</p>
+                    <p id="intercept" class="text-lg font-semibold text-gray-800">-</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-sm text-gray-600 mb-1">Correlation Coefficient (r)</p>
+                    <p id="correlation" class="text-lg font-semibold text-gray-800">-</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-sm text-gray-600 mb-1">Coefficient of Determination (r²)</p>
+                    <p id="r-squared" class="text-lg font-semibold text-gray-800">-</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <p class="text-sm text-gray-600 mb-1">Strength of Relationship</p>
+                    <p id="strength" class="text-lg font-semibold text-gray-800">-</p>
                 </div>
             </div>
-
-            <!-- Scatter Diagram -->
-            <div class="bg-white rounded-lg shadow-xl p-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3">Scatter Diagram</h2>
-                <canvas id="scatter-diagram" width="500" height="500" class="border border-gray-200 rounded-lg w-full"></canvas>
-            </div>
         </div>
-    </div>
 
-    <script src="script.js"></script>
+        <!-- SCATTER -->
+        <div id="scatter-card" class="card shadow-xl p-8 cursor-pointer transition">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 border-b pb-3 tracking-tight">
+                Scatter Diagram
+            </h2>
+            <canvas id="scatter-diagram" width="500" height="500"
+                    class="border border-gray-200 rounded-lg w-full bg-gray-50 shadow-inner"></canvas>
+        </div>
+    </section>
+</main>
+
+<!-- FOOTER -->
+<footer class="mt-10 py-6 text-center text-gray-600">
+    <p>Advanced Statistics Calculator © 2025 | Built for Analysis Projects</p>
+</footer>
+
+<!-- MODAL -->
+<div id="modal-overlay" class="modal-overlay">
+    <div class="modal-content">
+        <canvas id="modal-scatter" width="600" height="600"
+                class="rounded-lg border border-gray-200 shadow-inner"></canvas>
+    </div>
+</div>
+
+<!-- SCRIPT -->
+<script>
+    const inputRows = document.getElementById("input-rows");
+    const addRowBtn = document.getElementById("add-row-btn");
+    const calculateBtn = document.getElementById("calculate-btn");
+
+    function addRow() {
+        const row = document.createElement("div");
+        row.classList.add("grid", "grid-cols-[1fr_1fr_auto]", "gap-4");
+        row.innerHTML = `
+        <input type="number" placeholder="Enter X value" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <input type="number" placeholder="Enter Y value" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <button class="text-white bg-red-500 hover:bg-red-600 rounded-lg px-3 transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>`;
+        row.querySelector("button").addEventListener("click", () => row.remove());
+        inputRows.appendChild(row);
+    }
+
+    // Add initial rows
+    for (let i = 0; i < 2; i++) {
+        addRow();
+    }
+
+    // Single event listener for add row button
+    addRowBtn.addEventListener("click", addRow);
+
+    calculateBtn.addEventListener("click", () => {
+        const rows = inputRows.querySelectorAll("div");
+        rows.forEach(row => {
+            const x = row.querySelectorAll("input")[0].value;
+            const y = row.querySelectorAll("input")[1].value;
+            if (!x || !y) row.remove();
+        });
+
+        // Scroll to the results section with proper offset
+        const resultsSection = document.getElementById("results-section");
+        const yOffset = -100;
+        const y = resultsSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+        window.scrollTo({
+            top: y,
+            behavior: "smooth"
+        });
+    });
+
+    const scatterCard = document.getElementById("scatter-card");
+    const modalOverlay = document.getElementById("modal-overlay");
+    const modalContent = document.querySelector(".modal-content");
+    const mainCanvas = document.getElementById("scatter-diagram");
+    const modalCanvas = document.getElementById("modal-scatter");
+
+
+    scatterCard.addEventListener("click", () => {
+        // Copy the scatter diagram to the modal
+        const ctx = modalCanvas.getContext("2d");
+        ctx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
+
+        // Draw white background
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, modalCanvas.width, modalCanvas.height);
+
+        // Copy the main canvas content to modal canvas
+        ctx.drawImage(mainCanvas, 0, 0, modalCanvas.width, modalCanvas.height);
+
+        modalOverlay.classList.add("active");
+        modalContent.classList.add("active");
+    });
+
+    modalOverlay.addEventListener("click", (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.classList.remove("active");
+            modalContent.classList.remove("active");
+        }
+    });
+</script>
+
+<script src="script.js"></script>
 </body>
 </html>
+

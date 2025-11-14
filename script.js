@@ -91,7 +91,7 @@ document.getElementById("calculate-btn").addEventListener("click", function() {
 
     const formatNumber = (num) => {
         if (!isFinite(num) || isNaN(num)) return "N/A";
-        return num.toFixed(4);
+        return parseFloat(num.toFixed(4)).toString();
     };
     
     const equation = b >= 0 

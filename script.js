@@ -1,63 +1,110 @@
 // Calculate and display regression results
 document.getElementById("calculate-btn").addEventListener("click", function() {
-    // Get all input rows
     const rows = document.querySelectorAll("#input-rows > div");
     const xValues = [];
     const yValues = [];
 
-    // Extract X and Y values
     rows.forEach(row => {
         const inputs = row.querySelectorAll("input");
-        const x = parseFloat(inputs[0].value);
-        const y = parseFloat(inputs[1].value);
+        const xInput = inputs[0].value.trim();
+        const yInput = inputs[1].value.trim();
+        
+        if (xInput === "" && yInput === "") {
+            return;
+        }
+        
+        const x = parseFloat(xInput);
+        const y = parseFloat(yInput);
 
-        if (!isNaN(x) && !isNaN(y)) {
+        if (!isNaN(x) && !isNaN(y) && isFinite(x) && isFinite(y)) {
             xValues.push(x);
             yValues.push(y);
         }
     });
 
-    // Need at least 2 points
     if (xValues.length < 2) {
-        alert("Please enter at least 2 valid data points.");
+        alert("Please enter at least 2 valid data points with numeric values.");
         return;
     }
 
-    // Calculate regression
     const n = xValues.length;
     const sumX = xValues.reduce((a, b) => a + b, 0);
     const sumY = yValues.reduce((a, b) => a + b, 0);
-    const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
-    const sumX2 = xValues.reduce((sum, x) => sum + x * x, 0);
-    const sumY2 = yValues.reduce((sum, y) => sum + y * y, 0);
+    const meanX = sumX / n;
+    const meanY = sumY / n;
+    
+    let sumXY = 0;
+    let sumX2 = 0;
+    let sumY2 = 0;
+    
+    for (let i = 0; i < n; i++) {
+        const dx = xValues[i] - meanX;
+        const dy = yValues[i] - meanY;
+        sumXY += dx * dy;
+        sumX2 += dx * dx;
+        sumY2 += dy * dy;
+    }
+    
+    if (Math.abs(sumX2) < 1e-10) {
+        alert("Error: All X values are the same. Cannot calculate regression line.\nPlease enter different X values.");
+        return;
+    }
+    
+    if (Math.abs(sumY2) < 1e-10) {
+        alert("Error: All Y values are the same. The relationship is constant.\nSlope will be 0 and correlation undefined.");
+    }
 
-    // Calculate slope (m) and intercept (b)
-    const m = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
-    const b = (sumY - m * sumX) / n;
+    const m = sumXY / sumX2;
+    const b = meanY - m * meanX;
 
-    // Calculate correlation coefficient (r)
-    const r = (n * sumXY - sumX * sumY) /
-              Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-    const r2 = r * r;
+    let r, r2;
+    const rDenominator = Math.sqrt(sumX2 * sumY2);
+    
+    if (Math.abs(rDenominator) < 1e-10) {
+        r = 0;
+        r2 = 0;
+    } else {
+        r = sumXY / rDenominator;
+        r2 = r * r;
+    }
+    
+    if (!isFinite(m) || !isFinite(b)) {
+        alert("Error: Calculation resulted in invalid values. Please check your data.");
+        return;
+    }
 
-    // Determine strength
     let strength;
     const absR = Math.abs(r);
-    if (absR >= 0.9) strength = "Very Strong";
-    else if (absR >= 0.7) strength = "Strong";
-    else if (absR >= 0.5) strength = "Moderate";
-    else if (absR >= 0.3) strength = "Weak";
-    else strength = "Very Weak";
+    if (!isFinite(r) || isNaN(r)) {
+        strength = "Undefined";
+    } else if (absR >= 0.9) {
+        strength = "Very Strong";
+    } else if (absR >= 0.7) {
+        strength = "Strong";
+    } else if (absR >= 0.5) {
+        strength = "Moderate";
+    } else if (absR >= 0.3) {
+        strength = "Weak";
+    } else {
+        strength = "Very Weak";
+    }
 
-    // Display results
-    document.getElementById("equation").textContent = `y = ${m.toFixed(4)}x + ${b.toFixed(4)}`;
-    document.getElementById("slope").textContent = m.toFixed(4);
-    document.getElementById("intercept").textContent = b.toFixed(4);
-    document.getElementById("correlation").textContent = r.toFixed(4);
-    document.getElementById("r-squared").textContent = r2.toFixed(4);
+    const formatNumber = (num) => {
+        if (!isFinite(num) || isNaN(num)) return "N/A";
+        return num.toFixed(4);
+    };
+    
+    const equation = b >= 0 
+        ? `y = ${formatNumber(m)}x + ${formatNumber(b)}`
+        : `y = ${formatNumber(m)}x - ${formatNumber(Math.abs(b))}`;
+    
+    document.getElementById("equation").textContent = equation;
+    document.getElementById("slope").textContent = formatNumber(m);
+    document.getElementById("intercept").textContent = formatNumber(b);
+    document.getElementById("correlation").textContent = formatNumber(r);
+    document.getElementById("r-squared").textContent = formatNumber(r2);
     document.getElementById("strength").textContent = strength;
 
-    // Draw scatter plot
     drawScatterPlot(xValues, yValues, m, b);
 });
 
@@ -65,10 +112,14 @@ function drawScatterPlot(xValues, yValues, m, b) {
     const canvas = document.getElementById("scatter-diagram");
     const ctx = canvas.getContext("2d");
 
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!xValues || !yValues || xValues.length === 0 || yValues.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        return;
+    }
 
-    // Set white background
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -76,13 +127,11 @@ function drawScatterPlot(xValues, yValues, m, b) {
     const width = canvas.width - 2 * padding;
     const height = canvas.height - 2 * padding;
 
-    // Find min and max values
     const minX = Math.min(...xValues);
     const maxX = Math.max(...xValues);
     const minY = Math.min(...yValues);
     const maxY = Math.max(...yValues);
 
-    // Add some padding to the ranges
     const xRange = maxX - minX || 1;
     const yRange = maxY - minY || 1;
     const xMin = minX - xRange * 0.1;
@@ -90,11 +139,9 @@ function drawScatterPlot(xValues, yValues, m, b) {
     const yMin = minY - yRange * 0.1;
     const yMax = maxY + yRange * 0.1;
 
-    // Scale functions
     const scaleX = (x) => padding + ((x - xMin) / (xMax - xMin)) * width;
     const scaleY = (y) => canvas.height - padding - ((y - yMin) / (yMax - yMin)) * height;
 
-    // Draw axes
     ctx.strokeStyle = "#333";
     ctx.lineWidth = 2;
     ctx.beginPath();
@@ -103,28 +150,22 @@ function drawScatterPlot(xValues, yValues, m, b) {
     ctx.lineTo(canvas.width - padding, canvas.height - padding);
     ctx.stroke();
 
-    // Draw axis labels
     ctx.fillStyle = "#333";
     ctx.font = "14px Arial";
     ctx.textAlign = "center";
-
-    // X-axis label
     ctx.fillText("X", canvas.width / 2, canvas.height - 20);
 
-    // Y-axis label
     ctx.save();
     ctx.translate(20, canvas.height / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.fillText("Y", 0, 0);
     ctx.restore();
 
-    // Draw grid and ticks
     ctx.strokeStyle = "#ddd";
     ctx.lineWidth = 1;
     ctx.fillStyle = "#666";
     ctx.font = "12px Arial";
 
-    // X-axis ticks
     for (let i = 0; i <= 5; i++) {
         const x = xMin + (xMax - xMin) * (i / 5);
         const px = scaleX(x);
@@ -137,7 +178,6 @@ function drawScatterPlot(xValues, yValues, m, b) {
         ctx.textAlign = "center";
         ctx.fillText(x.toFixed(1), px, canvas.height - padding + 20);
 
-        // Grid line
         ctx.strokeStyle = "#f0f0f0";
         ctx.beginPath();
         ctx.moveTo(px, padding);
@@ -146,7 +186,6 @@ function drawScatterPlot(xValues, yValues, m, b) {
         ctx.strokeStyle = "#ddd";
     }
 
-    // Y-axis ticks
     for (let i = 0; i <= 5; i++) {
         const y = yMin + (yMax - yMin) * (i / 5);
         const py = scaleY(y);
@@ -159,7 +198,6 @@ function drawScatterPlot(xValues, yValues, m, b) {
         ctx.textAlign = "right";
         ctx.fillText(y.toFixed(1), padding - 10, py + 5);
 
-        // Grid line
         ctx.strokeStyle = "#f0f0f0";
         ctx.beginPath();
         ctx.moveTo(padding, py);
@@ -168,17 +206,20 @@ function drawScatterPlot(xValues, yValues, m, b) {
         ctx.strokeStyle = "#ddd";
     }
 
-    // Draw regression line
-    ctx.strokeStyle = "#3b82f6";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    const y1 = m * xMin + b;
-    const y2 = m * xMax + b;
-    ctx.moveTo(scaleX(xMin), scaleY(y1));
-    ctx.lineTo(scaleX(xMax), scaleY(y2));
-    ctx.stroke();
+    if (isFinite(m) && isFinite(b)) {
+        ctx.strokeStyle = "#3b82f6";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const y1 = m * xMin + b;
+        const y2 = m * xMax + b;
+        
+        if (isFinite(y1) && isFinite(y2)) {
+            ctx.moveTo(scaleX(xMin), scaleY(y1));
+            ctx.lineTo(scaleX(xMax), scaleY(y2));
+            ctx.stroke();
+        }
+    }
 
-    // Draw data points
     ctx.fillStyle = "#4f46e5";
     xValues.forEach((x, i) => {
         const y = yValues[i];
@@ -189,11 +230,9 @@ function drawScatterPlot(xValues, yValues, m, b) {
         ctx.arc(px, py, 5, 0, 2 * Math.PI);
         ctx.fill();
 
-        // Add stroke for better visibility
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 2;
         ctx.stroke();
         ctx.strokeStyle = "#3b82f6";
     });
 }
-

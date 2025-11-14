@@ -4,8 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Advanced Statistics</title>
-
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -211,32 +209,81 @@
         const row = document.createElement("div");
         row.classList.add("grid", "grid-cols-[1fr_1fr_auto]", "gap-4");
         row.innerHTML = `
-        <input type="number" placeholder="Enter X value" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
-        <input type="number" placeholder="Enter Y value" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <input type="number" step="any" placeholder="Enter X value" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
+        <input type="number" step="any" placeholder="Enter Y value" class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none" />
         <button class="text-white bg-red-500 hover:bg-red-600 rounded-lg px-3 transition">
           <i class="fa-solid fa-xmark"></i>
         </button>`;
-        row.querySelector("button").addEventListener("click", () => row.remove());
+        
+        const inputs = row.querySelectorAll("input");
+        inputs.forEach(input => {
+            input.addEventListener("input", function() {
+                const value = this.value.trim();
+                if (value !== "") {
+                    const num = parseFloat(value);
+                    if (isNaN(num) || !isFinite(num)) {
+                        this.classList.add("border-red-500", "bg-red-50");
+                    } else {
+                        this.classList.remove("border-red-500", "bg-red-50");
+                    }
+                } else {
+                    this.classList.remove("border-red-500", "bg-red-50");
+                }
+            });
+        });
+        
+        row.querySelector("button").addEventListener("click", () => {
+            if (inputRows.children.length > 1) {
+                row.remove();
+            }
+        });
         inputRows.appendChild(row);
     }
 
-    // Add initial rows
     for (let i = 0; i < 2; i++) {
         addRow();
     }
 
-    // Single event listener for add row button
     addRowBtn.addEventListener("click", addRow);
 
     calculateBtn.addEventListener("click", () => {
         const rows = inputRows.querySelectorAll("div");
+        let hasValidData = false;
+        
         rows.forEach(row => {
-            const x = row.querySelectorAll("input")[0].value;
-            const y = row.querySelectorAll("input")[1].value;
-            if (!x || !y) row.remove();
+            const xInput = row.querySelectorAll("input")[0];
+            const yInput = row.querySelectorAll("input")[1];
+            const x = xInput.value.trim();
+            const y = yInput.value.trim();
+            
+            if (x !== "" && y !== "") {
+                const xNum = parseFloat(x);
+                const yNum = parseFloat(y);
+                
+                if (!isNaN(xNum) && !isNaN(yNum) && isFinite(xNum) && isFinite(yNum)) {
+                    hasValidData = true;
+                } else {
+                    if (isNaN(xNum) || !isFinite(xNum)) {
+                        xInput.classList.add("border-red-500");
+                    }
+                    if (isNaN(yNum) || !isFinite(yNum)) {
+                        yInput.classList.add("border-red-500");
+                    }
+                }
+            }
+            
+            if (!isNaN(parseFloat(x)) && isFinite(parseFloat(x))) {
+                xInput.classList.remove("border-red-500");
+            }
+            if (!isNaN(parseFloat(y)) && isFinite(parseFloat(y))) {
+                yInput.classList.remove("border-red-500");
+            }
         });
 
-        // Scroll to the results section with proper offset
+        if (!hasValidData) {
+            return;
+        }
+
         const resultsSection = document.getElementById("results-section");
         const yOffset = -100;
         const y = resultsSection.getBoundingClientRect().top + window.pageYOffset + yOffset;
@@ -255,15 +302,12 @@
 
 
     scatterCard.addEventListener("click", () => {
-        // Copy the scatter diagram to the modal
         const ctx = modalCanvas.getContext("2d");
         ctx.clearRect(0, 0, modalCanvas.width, modalCanvas.height);
 
-        // Draw white background
         ctx.fillStyle = "white";
         ctx.fillRect(0, 0, modalCanvas.width, modalCanvas.height);
 
-        // Copy the main canvas content to modal canvas
         ctx.drawImage(mainCanvas, 0, 0, modalCanvas.width, modalCanvas.height);
 
         modalOverlay.classList.add("active");
